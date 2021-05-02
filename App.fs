@@ -24,18 +24,19 @@ type Message =
 let update message model =
     match message with
     | SetNew title ->
-        { model with NewTask = title }, Cmd.none
+        { model with NewTask = title }
+        , Cmd.none
     | Add ->
         { model with
             NewTask = String.Empty
             Tasks = Task.Model.create model.NewTask :: model.Tasks }
         , Cmd.none
     | Remove task ->
-        { model with Tasks = List.filter (fun t -> t.Id <> task.Id) model.Tasks }
+        { model with Tasks = model.Tasks |> List.filter (fun t -> t.Id <> task.Id) }
         , Cmd.none
     | WrapTask (task, taskMsg) ->
         let task, taskCmd = Task.update taskMsg task
-        model
+        { model with Tasks = model.Tasks |> List.map (fun t -> if t.Id = task.Id then task else t) }
         , Cmd.batch [
             Cmd.map WrapTask taskCmd
             if taskMsg = Task.Destroy then Cmd.ofMsg (Remove task)

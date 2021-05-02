@@ -9,7 +9,9 @@ open Bolero.Html
 type Model =
     { NewTask: string
       Tasks: Task.Model list }
-    static member Empty =
+
+module Model =
+    let empty =
         { NewTask = String.Empty
           Tasks = List.empty }
 
@@ -26,7 +28,7 @@ let update message model =
     | Add ->
         { model with
             NewTask = String.Empty
-            Tasks = Task.create model.NewTask :: model.Tasks }
+            Tasks = Task.Model.create model.NewTask :: model.Tasks }
         , Cmd.none
     | Remove task ->
         { model with Tasks = List.filter (fun t -> t.Id <> task.Id) model.Tasks }
@@ -90,7 +92,7 @@ open Microsoft.JSInterop
 type Component () =
     inherit ProgramComponent<Model, Message> ()
     override this.Program =
-        Program.mkProgram (fun _ -> Model.Empty, Cmd.none) update view
+        Program.mkProgram (fun _ -> Model.empty, Cmd.none) update view
 #if DEBUG
         |> Program.withTrace (fun msg mdl ->
             this.JSRuntime.InvokeVoidAsync("console.log", string msg, mdl) |> ignore)

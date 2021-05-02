@@ -8,29 +8,42 @@ open Bolero.Html
 
 type Model =
     { Id: Guid
-      Title: string }
-    static member Empty =
-        { Id = Guid.Empty
-          Title = String.Empty }
+      Title: string
+      Completed: bool }
 
-let create title =
-    { Id = Guid.NewGuid ()
-      Title = title }
+module Model =
+
+    let empty =
+        { Id = Guid.Empty
+          Title = String.Empty
+          Completed = false }
+
+    let create title =
+        { Id = Guid.NewGuid ()
+          Title = title
+          Completed = false }
+
 
 type Message =
+    | Completed of bool
     | Destroy
 
 let update message model =
     match message with
+    | Completed completed ->
+        { model with Completed = completed }, Cmd.none
     | Destroy ->
         model, Cmd.none
 
 type Component () =
     inherit ElmishComponent<Model, Message> ()
     override _.View model dispatch =
-        li [ attr.``class`` "todo" ] [
+        li [ attr.classes [ "todo"; if model.Completed then "completed" ] ] [
             div [ attr.``class`` "view" ] [
-                input [ attr.``class`` "toggle"; attr.``type`` "checkbox" ]
+                input
+                    [ bind.``checked`` model.Completed (Completed >> dispatch)
+                      attr.``class`` "toggle"
+                      attr.``type`` "checkbox" ]
                 label [] [ text model.Title ]
                 button
                     [ on.click (fun _ -> dispatch Destroy)

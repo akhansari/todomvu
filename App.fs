@@ -5,18 +5,18 @@ open System
 open Elmish
 open Bolero
 open Bolero.Html
-open Bolero.Templating.Client
 
 type Model =
     { NewTask: string
       Tasks: Task.Model list }
     static member Empty =
         { NewTask = String.Empty
-          Tasks = [] }
+          Tasks = List.empty }
 
 type Message =
     | SetNew of string
     | Add
+    | WrapTask of Task.Model * Task.Message
 
 let update message model =
     match message with
@@ -27,6 +27,9 @@ let update message model =
             NewTask = String.Empty
             Tasks = Task.create model.NewTask :: model.Tasks }
         , Cmd.none
+    | WrapTask (task, taskMsg) ->
+        let task, taskCmd = Task.update taskMsg task
+        model, Cmd.map WrapTask taskCmd
 
 let headerView model dispatch =
     header [ attr.``class`` "header" ] [
@@ -47,14 +50,7 @@ let mainView model dispatch =
         label [ attr.``for`` "toggle-all" ] [ text "Mark all as complete" ]
         ul [ attr.``class`` "todo-list" ] [
             forEach model.Tasks <| fun task ->
-                li [ attr.``class`` "todo" ] [
-                    div [ attr.``class`` "view" ] [
-                        input [ attr.``class`` "toggle"; attr.``type`` "checkbox" ]
-                        label [] [ text task.Title ]
-                        button [ attr.``class`` "destroy" ] []
-                    ]
-                    input [ attr.``class`` "edit"; attr.``type`` "text" ]
-                ]
+                Task.view task (fun m -> WrapTask (task, m) |> dispatch)
         ]
     ]
 
@@ -84,7 +80,7 @@ let view model dispatch =
 open Microsoft.JSInterop
 
 type Component () =
-    inherit ProgramComponent<Model, Message>()
+    inherit ProgramComponent<Model, Message> ()
     override this.Program =
         Program.mkProgram (fun _ -> Model.Empty, Cmd.none) update view
 #if DEBUG

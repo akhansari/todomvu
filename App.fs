@@ -8,40 +8,65 @@ open Bolero.Html
 open Bolero.Templating.Client
 
 type Model =
-    { Init: unit }
+    { NewTask: string
+      Tasks: Task.Model list }
     static member Empty =
-        { Init = () }
+        { NewTask = String.Empty
+          Tasks = [] }
 
-type Message = unit
+type Message =
+    | SetNew of string
+    | Add
 
 let update message model =
-    model, Cmd.none
+    match message with
+    | SetNew title ->
+        { model with NewTask = title }, Cmd.none
+    | Add ->
+        { model with
+            NewTask = String.Empty
+            Tasks = Task.create model.NewTask :: model.Tasks }
+        , Cmd.none
 
 let view model dispatch =
     section [ attr.``class`` "todoapp" ] [
         header [ attr.``class`` "header" ] [
             h1 [] [ text "todos" ]
             input
-                [ attr.``class`` "new-todo"
+                [ on.keydown (fun e -> if e.Key = "Enter" then dispatch Add)
+                  bind.input.string model.NewTask (SetNew >> dispatch)
+                  attr.``class`` "new-todo"
                   attr.placeholder "What needs to be done?"
                   attr.autocomplete false
                   attr.autofocus true ]
         ]
-        section [ attr.``class`` "main" ] [
-            input [ attr.id "toggle-all"; attr.``class`` "toggle-all"; attr.``type`` "checkbox" ]
-            label [ attr.``for`` "toggle-all" ] [ text "Mark all as complete" ]
-            ul [ attr.``class`` "todo-list" ] [
+        cond model.Tasks <| function
+        | [] -> Empty
+        | tasks -> concat [
+            section [ attr.``class`` "main" ] [
+                input [ attr.id "toggle-all"; attr.``class`` "toggle-all"; attr.``type`` "checkbox" ]
+                label [ attr.``for`` "toggle-all" ] [ text "Mark all as complete" ]
+                ul [ attr.``class`` "todo-list" ] [
+                    forEach tasks <| fun task ->
+                        li [ attr.``class`` "todo" ] [
+                            div [ attr.``class`` "view" ] [
+                                input [ attr.``class`` "toggle"; attr.``type`` "checkbox" ]
+                                label [] [ text task.Title ]
+                                button [ attr.``class`` "destroy" ] []
+                            ]
+                            input [ attr.``class`` "edit"; attr.``type`` "text" ]
+                        ]
+                ]
             ]
-        ]
-        footer [ attr.``class`` "footer" ] [
-            span [ attr.``class`` "todo-count" ] []
-            ul [ attr.``class`` "filters" ] [
-                li [] [ a [] [ text "All" ] ]
-                li [] [ a [] [ text "Active" ] ]
-                li [] [ a [] [ text "Completed" ] ]
-            ]
-            button [ attr.``class`` "clear-completed" ] [ text "Clear completed" ]
-        ]
+            footer [ attr.``class`` "footer" ] [
+                span [ attr.``class`` "todo-count" ] []
+                ul [ attr.``class`` "filters" ] [
+                    li [] [ a [] [ text "All" ] ]
+                    li [] [ a [] [ text "Active" ] ]
+                    li [] [ a [] [ text "Completed" ] ]
+                ]
+                button [ attr.``class`` "clear-completed" ] [ text "Clear completed" ]
+            ] ]
     ]
 
 open Microsoft.JSInterop

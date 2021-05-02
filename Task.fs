@@ -18,10 +18,12 @@ let create title =
       Title = title }
 
 type Message =
-    unit
+    | Destroy
 
 let update message model =
-    model, Cmd.none
+    match message with
+    | Destroy ->
+        model, Cmd.none
 
 type Component () =
     inherit ElmishComponent<Model, Message> ()
@@ -30,7 +32,10 @@ type Component () =
             div [ attr.``class`` "view" ] [
                 input [ attr.``class`` "toggle"; attr.``type`` "checkbox" ]
                 label [] [ text model.Title ]
-                button [ attr.``class`` "destroy" ] []
+                button
+                    [ on.click (fun _ -> dispatch Destroy)
+                      attr.``class`` "destroy" ]
+                    []
             ]
             input [ attr.``class`` "edit"; attr.``type`` "text" ]
         ]

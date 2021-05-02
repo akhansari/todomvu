@@ -16,6 +16,7 @@ type Model =
 type Message =
     | SetNew of string
     | Add
+    | Remove of Task.Model
     | WrapTask of Task.Model * Task.Message
 
 let update message model =
@@ -27,9 +28,16 @@ let update message model =
             NewTask = String.Empty
             Tasks = Task.create model.NewTask :: model.Tasks }
         , Cmd.none
+    | Remove task ->
+        { model with Tasks = List.filter (fun t -> t.Id <> task.Id) model.Tasks }
+        , Cmd.none
     | WrapTask (task, taskMsg) ->
         let task, taskCmd = Task.update taskMsg task
-        model, Cmd.map WrapTask taskCmd
+        model
+        , Cmd.batch [
+            Cmd.map WrapTask taskCmd
+            if taskMsg = Task.Destroy then Cmd.ofMsg (Remove task)
+        ]
 
 let headerView model dispatch =
     header [ attr.``class`` "header" ] [

@@ -28,11 +28,14 @@ module Model =
     let addTo tasks title =
         create title :: tasks
 
+    let updateIn tasks newTask =
+        tasks |> List.map (fun oldTask -> if oldTask.Id = newTask.Id then newTask else oldTask)
+
     let removeFrom tasks task =
         tasks |> List.filter (fun t -> t.Id <> task.Id)
 
-    let updateIn tasks newTask =
-        tasks |> List.map (fun oldTask -> if oldTask.Id = newTask.Id then newTask else oldTask)
+    let cleanState tasks state =
+        tasks |> List.filter (fun t -> t.State <> state)
 
 type Message =
     | SetCompleted of bool

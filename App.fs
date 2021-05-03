@@ -24,6 +24,7 @@ type Message =
     | SetNew of string
     | Add
     | Remove of Task.Model
+    | ClearCompleted
     | SetFilter of Task.State option
     | WrapTask of Task.Model * Task.Message
 
@@ -45,6 +46,10 @@ let update message model =
         , Cmd.none
     | Remove task ->
         Task.Model.removeFrom model.Tasks task
+        |> updateTasks model
+        , Cmd.none
+    | ClearCompleted ->
+        Task.Model.cleanState model.Tasks Task.Completed
         |> updateTasks model
         , Cmd.none
     | SetFilter filter ->
@@ -82,7 +87,7 @@ let mainView tasks dispatch =
         ]
     ]
 
-let footerView remaining filter dispatch =
+let footerView remaining canClear filter dispatch =
     footer [ attr.``class`` "footer" ] [
         span
             [ attr.``class`` "todo-count" ]
@@ -105,7 +110,10 @@ let footerView remaining filter dispatch =
                 [ text "Completed" ]
             ]
         ]
-        button [ attr.``class`` "clear-completed" ] [ text "Clear completed" ]
+        button
+            [ on.click (fun _ -> dispatch ClearCompleted)
+              attr.classes [ "clear-completed"; if not canClear then "hidden" ] ]
+            [ text "Clear completed" ]
     ]
 
 let view model dispatch =
@@ -120,9 +128,11 @@ let view model dispatch =
                 | None       -> model.Tasks
             let remaining =
                 model.FilteredTasks.[Task.Active].Length
+            let canClear =
+                model.FilteredTasks.[Task.Completed].Length > 0
             concat [
                 mainView tasks dispatch
-                footerView remaining model.Filter dispatch
+                footerView remaining canClear model.Filter dispatch
             ]
     ]
 

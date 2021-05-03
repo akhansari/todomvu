@@ -34,6 +34,9 @@ module Model =
     let removeFrom tasks task =
         tasks |> List.filter (fun t -> t.Id <> task.Id)
 
+    let setState tasks state =
+        tasks |> List.map (fun t -> { t with State = state })
+
     let cleanState tasks state =
         tasks |> List.filter (fun t -> t.State <> state)
 

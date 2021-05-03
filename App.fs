@@ -24,6 +24,7 @@ type Message =
     | SetNew of string
     | Add
     | Remove of Task.Model
+    | ToggleStates
     | ClearCompleted
     | SetFilter of Task.State option
     | WrapTask of Task.Model * Task.Message
@@ -46,6 +47,11 @@ let update message model =
         , Cmd.none
     | Remove task ->
         Task.Model.removeFrom model.Tasks task
+        |> updateTasks model
+        , Cmd.none
+    | ToggleStates ->
+        if model.FilteredTasks.[Task.Active].IsEmpty then Task.Active else Task.Completed
+        |> Task.Model.setState model.Tasks
         |> updateTasks model
         , Cmd.none
     | ClearCompleted ->
@@ -77,9 +83,13 @@ let headerView newTask dispatch =
         ]
     ]
 
-let mainView tasks dispatch =
+let mainView tasks noActiveState dispatch =
     section [ attr.``class`` "main" ] [
-        input [ attr.id "toggle-all"; attr.``class`` "toggle-all"; attr.``type`` "checkbox" ]
+        input
+            [ bind.``checked`` noActiveState (fun _ -> dispatch ToggleStates)
+              attr.id "toggle-all"
+              attr.``class`` "toggle-all"
+              attr.``type`` "checkbox" ]
         label [ attr.``for`` "toggle-all" ] [ text "Mark all as complete" ]
         ul [ attr.``class`` "todo-list" ] [
             forEach tasks <| fun task ->
@@ -130,8 +140,10 @@ let view model dispatch =
                 model.FilteredTasks.[Task.Active].Length
             let canClear =
                 model.FilteredTasks.[Task.Completed].Length > 0
+            let noActiveState =
+                model.FilteredTasks.[Task.Active].IsEmpty
             concat [
-                mainView tasks dispatch
+                mainView tasks noActiveState dispatch
                 footerView remaining canClear model.Filter dispatch
             ]
     ]

@@ -7,10 +7,58 @@
     <link rel="stylesheet" href="styles.css" />
     <base href="/">
 </head>
-<body>
+<body class="learn-bar">
+
+    <aside class="learn">
+        <header>
+            <h3>Bolero</h3>
+            <div class="source-links">
+                <h5>Example</h5>
+                <a href="https://github.com/akhansari/todomvu">Source</a>
+            </div>
+        </header>
+        <hr>
+        <blockquote class="quote speech-bubble">
+            <p>
+                Develop SPAs with the full power of F# and .NET.<br>
+                Bolero uses Blazor to bring F# to WebAssembly.
+            </p>
+            <footer><a href="https://fsbolero.io">Bolero</a></footer>
+        </blockquote>
+        <hr>
+        <h4>Official Resources</h4>
+        <ul>
+            <li> <a href="https://fsbolero.io/docs/">Documentation</a> </li>
+            <li> <a href="https://fsbolero.io/docs/reference/">API Reference</a> </li>
+            <li> <a href="https://github.com/fsbolero/bolero">Bolero on GitHub</a> </li>
+        </ul>
+        <h4>Community</h4>
+        <ul>
+            <li> <a href="https://twitter.com/fsbolero">Twitter</a> </li>
+            <li> <a href="https://fsharp.slack.com/">F# Software Foundation Slack</a> </li>
+        </ul>
+        <footer>
+            <hr>
+            <em>
+                If you have other helpful links to share, or find any of the links above no longer work,
+                please <a href="https://github.com/akhansari/todomvu/issues">let us know</a>.
+            </em>
+        </footer>
+    </aside>
+
     <div id="app">
         Loading . . .
     </div>
+
+    <footer class="info">
+        <p>Double-click to edit a todo</p>
+        <p>
+            Created by <a href="https://twitter.com/akhansari">Amin Khansari</a>
+            using <a href="https://fsbolero.io">Bolero</a>
+        </p>
+        <p>Inspired by <a href="http://todomvc.com">TodoMVC</a></p>
+    </footer>
+
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
 </html>

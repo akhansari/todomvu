@@ -20,7 +20,6 @@
   <ItemGroup>
     <PackageReference Include="Bolero" Version="0.16.27" />
     <PackageReference Include="Bolero.Build" Version="0.16.27" />
-    <PackageReference Include="Bolero.HotReload" Version="0.16.13" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.5" />
   </ItemGroup>
 

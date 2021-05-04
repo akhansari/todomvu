@@ -66,7 +66,7 @@ let update message model =
         Task.Model.updateIn model.Tasks task
         |> updateTasks model
         , Cmd.batch [
-            Cmd.map WrapTask taskCmd
+            Cmd.map (fun m -> WrapTask (task, m)) taskCmd
             if taskMsg = Task.Destroy then Cmd.ofMsg (Remove task)
         ]
 
@@ -148,13 +148,10 @@ let view model dispatch =
             ]
     ]
 
-open Microsoft.JSInterop
-
 type Component () =
     inherit ProgramComponent<Model, Message> ()
     override this.Program =
-        Program.mkProgram (fun _ -> Model.empty, Cmd.none) update view
-#if DEBUG
-        |> Program.withTrace (fun msg mdl ->
-            this.JSRuntime.InvokeVoidAsync("console.log", string msg, mdl) |> ignore)
-#endif
+        Program.mkProgram
+            (fun _ -> Model.empty, Cmd.none)
+            update
+            view

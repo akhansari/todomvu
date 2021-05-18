@@ -2,6 +2,7 @@
 module TodoMvu.Task
 
 open System
+open System.Threading.Tasks
 open Elmish
 open Bolero
 open Bolero.Html
@@ -107,7 +108,9 @@ type Component () =
             ]
 
     override _.OnAfterRenderAsync _ =
-        inputRef.Value.FocusAsync().AsTask()
+        match inputRef.Value with
+        | Some elem -> elem.FocusAsync().AsTask()
+        | None      -> Task.CompletedTask
 
 let view model dispatch =
     ecomp<Component,_,_> [] model dispatch
